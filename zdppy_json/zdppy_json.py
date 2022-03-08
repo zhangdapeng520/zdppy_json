@@ -1,5 +1,5 @@
-import orjson
 import json
+from .encoder import DecimalEncoder
 
 
 def loads(json_str: str):
@@ -7,7 +7,7 @@ def loads(json_str: str):
     将json字符串加载为python对象
     :return:
     """
-    return orjson.loads(json_str)
+    return json.loads(json_str)
 
 
 def dumps(py_obj):
@@ -16,9 +16,7 @@ def dumps(py_obj):
     :param py_obj:
     :return:
     """
-    return orjson.dumps(py_obj,
-                        option=orjson.OPT_PASSTHROUGH_DATACLASS | orjson.OPT_OMIT_MICROSECONDS | orjson.OPT_NON_STR_KEYS | orjson.OPT_APPEND_NEWLINE | orjson.OPT_INDENT_2 | orjson.OPT_NAIVE_UTC | orjson.OPT_SERIALIZE_NUMPY
-                        ).decode("utf8")
+    return json.dumps(py_obj, cls=DecimalEncoder)
 
 
 def load(file_name: str):
