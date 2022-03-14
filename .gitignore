@@ -131,9 +131,5 @@ dmypy.json
 **/.vscode
 **/__pycache__
 **/*.db
-
-
-
-*.json
-main*.py
-*.csv
+main*
+test*

@@ -1,4 +1,7 @@
 import json
+import os
+from typing import Union, Tuple, List, Dict
+
 from .encoder import DecimalEncoder
 
 
@@ -42,33 +45,84 @@ def dump(file_name: str, data):
 
 
 class Json:
-    def __init__(self):
+    def __init__(self,
+                 config: str = "config/config.json",
+                 config_secret: str = "config/secret/.config.json"
+                 ):
+        """
+        初始化json对象
+        :param config:公开的配置文件
+        :param config_secret: 私密的配置文件
+        """
         self.__data = None
+        self.__config_file = config
+        self.__config_secret_file = config_secret
+        self.config = {}  # 配置信息
+        self.__init_config()  # 初始化配置
+
+    def __init_config(self):
+        """
+        初始化配置
+        :return:
+        """
+        # 读取公共配置
+        if os.path.exists(self.__config_file):
+            with open(self.__config_file, "r") as f:
+                config = json.load(f)
+                self.config.update(config)
+
+        # 读取私密配置
+        if os.path.exists(self.__config_secret_file):
+            with open(self.__config_secret_file, "r") as f:
+                config = json.load(f)
+                self.config.update(config)
 
     def set(self, data):
         self.__data = data
 
-    def get_key_list(self, key, child_keys):
+    def __read_config(self, config: str):
         """
-        获取指定key下多个子key的数据
-        :param key:
-        :param child_keys:
+        读取单个配置文件
+        :param config: 配置文件
         :return:
         """
-        data = self.__data.get(key)
-        result = {}
-        for k in child_keys:
-            result[k] = data.get(k)
-        return result
+        if os.path.exists(config):
+            with open(config, "r") as f:
+                c = json.load(f)
+                self.config.update(c)
 
-    def get_all_child_keys(self, keys):
+    def read_config(self, config: Union[str, List, Tuple]):
         """
-        根据子键获取所有数据
-        :param keys:
+        读取配置
         :return:
         """
-        result = {}
-        for k in self.__data.keys:
-            temp = self.__data.get(k)
-            temp_result = []
-        pass
+        # 读取单个文件
+        if isinstance(config, str):
+            self.__read_config(config)
+        # 读取多个文件
+        elif isinstance(config, tuple) or isinstance(config, list):
+            for c in config:
+                self.__read_config(c)
+
+    def save_config(self, config: str = "config/zdppy_json_config.json"):
+        """
+        保存配置
+        :param config:配置文件名称
+        :return:
+        """
+        with open(config, "w") as f:
+            json.dump(f, self.config, ensure_ascii=False)
+
+    def update_config(self, config: Union[Dict, str, List, Tuple]):
+        """
+        更新配置
+        :param config:配置文件信息
+        :return:
+        """
+        if isinstance(config, dict):
+            self.config.update(config)
+        else:
+            self.read_config(config)
+
+    def __str__(self):
+        return json.dumps(self.config)
